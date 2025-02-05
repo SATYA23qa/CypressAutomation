@@ -1,0 +1,40 @@
+{
+  "name": "cypressautomation",
+  "version": "1.0.0",
+  " description ":"learning Cypress 12 version",
+  "main": "index.js",
+           
+  "scripts": {  
+    "test:alert": "npx cypress run --spec cypress/e2e/test/alerts.cy.js",
+    "test:dropdown": "npx cypress run --spec cypress/e2e/test/dropdown.cy.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "chrome-execution":"npx cypress run cypress/e2e/**/*.js --browser chrome --headed",
+    "edge-execution":"npx cypress run cypress/e2e/**/*.js --browser edge --headed",
+    "npm":"npx cypress run --browser chrome --headed --record --key <0801d75e-32c1-4e04-9543-e62866f2152c>",
+    "test:cypress": "cypress run --record --parallel"
+    
+
+  }, 
+  "repository":{
+    "type":"git",
+    "url":"git+https://github"
+  },
+  "author": "satya",
+  "license": "ISC",
+  "bugs":{
+    "url":"github/issues"
+  },
+  "devDependencies": {
+    "cypress": "^14.0.1",
+    "cypress-mochawesome-reporter":"^3.5.1",
+    "cypress-file-upload": "^5.0.8",
+    "cypress-iframe": "^1.0.1",
+    "cypress-xpath": "^2.0.1"
+
+  },
+  "dependencies": {
+    "mocha": "^11.1.0"
+  },
+  "description": ""
+}
+

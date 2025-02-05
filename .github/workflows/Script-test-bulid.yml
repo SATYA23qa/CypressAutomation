@@ -1,0 +1,27 @@
+name: sanity build tests
+on: push
+jobs :
+  cypress-run:
+    runs-on: ubuntu-22.04
+      steps:
+        -name: Checkout
+         uses: actions/checkout@v3
+        #Install npm dependencies, cache them coorectly
+        # and run all Cypress tests
+        -name: Cypress run
+         uses: cypress-io/github-action@v5
+         with:
+          command: npm run test:alerts  
+
+       
+      - name: Run Cypress Tests
+        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+   
+
+        -name: Cypress test Report  
+         if: always()
+        -uses: actions/upload-artifact@v3
+          with:  # report getting generated in  your cicd pipeline as folder
+           name: mochawesome HTML Report # name means folder name
+           path: cypress/reports/html # or path/to/artifact  path your folder  
+

@@ -1,0 +1,31 @@
+name: Regression End to End tests
+on: push
+jobs :
+  cypress-run:
+    runs-on: ubuntu-22.04
+      steps:
+    -name: Checkout
+     uses: actions/checkout@v3
+        #Install npm dependencies, cache them coorectly
+        # and run all Cypress tests
+    -name: Cypress run
+     uses: cypress-io/github-action@v5
+
+         // upload Report  Folder to CI CD interface
+
+     -name: Cypress test Report  
+       if: always()
+     -uses: actions/upload-artifact@v3
+          with:  # report getting generated in  your cicd pipeline as folder
+           name: mochawesome HTML Report # name means folder name
+           path: cypress/reports/html # or path/to/artifact  path your folder  
+
+      -name : Slack Notification 
+       uses : rtCamp/action-slack-notify@v2
+       env:
+         SLACK_COLOR: ${{ job.status}} # or a specific color like 'good' or '#ff00ff' 
+         SLACK_ICON: http:// github.com.rtCamp.png?size=48                                       
+         SLACK_MESSAGE: 'Test Automation Report  http://github.com/satya/Cypress-E2E/actions/run/${{github.run_id}}'  //dynamically create run id 
+         SLACK_TITLE: Post Title
+         SLACK_USERNAME: rtCamp
+         SLACK_WEBHOOK:${{secret.SLACK_WEBHOOK}}

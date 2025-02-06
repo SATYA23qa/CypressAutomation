@@ -1,0 +1,21 @@
+name: browser build tests
+on: push
+jobs:
+  Cypress-run:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Cypress-run
+        uses: cypress-io/github-action@v5
+        with:
+          browser: firefox

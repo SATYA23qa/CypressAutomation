@@ -1,20 +1,17 @@
 name: Cypress Tests with Dependency and Artifact Caching
 
 on: push
-#create the build pipeline and create workflow
-jobs: // two jobs install and cypress run
-  install: 
-    runs-on: ubuntu-24.04
-    steps:     # we are checking out the code from github repository
-      - name: Checkout 
+
+jobs:
+  install:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
         uses: actions/checkout@v4
-        #install npm dependencies, cache them correctly
-        #and run all cypress tests
 
       - name: Cypress install
         uses: cypress-io/github-action@v6
         with:
-          # Disable running of tests within install job
           runTests: false
           build: npm run build
 
@@ -22,29 +19,25 @@ jobs: // two jobs install and cypress run
         uses: actions/upload-artifact@v4
         with:
           name: build
-          if-no-files-found: error
           path: build
+          if-no-files-found: error
 
   cypress-run:
-    runs-on: ubuntu-24.04
+    runs-on: windows-latest
     needs: install
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-     
-     -name: Cypress run
-      uses: cypress-io/github-action@v5
-        with:
-           command : npm run test :alerts.cy.js
-           
-      - name: Download the build folder
+
+      - name: Download build folder
         uses: actions/download-artifact@v4
         with:
           name: build
           path: build
 
-      - name: Cypress run
+      - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
           start: npm start
           browser: chrome
+          command: npm run test alerts.cy.js

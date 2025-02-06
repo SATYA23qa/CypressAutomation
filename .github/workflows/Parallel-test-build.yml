@@ -1,57 +1,58 @@
-name: Parallel  tests
-on: push # if event is happen github repository action wolud be trigger or job would be trigger
-jobs :
-  dropdown-run:
-    runs-on: ubuntu-22.04
-      steps:
-        -name: Checkout
-         uses: actions/checkout@v3
-        #Install npm dependencies, cache them coorectly
-        # and run all Cypress tests
-        -name: Cypress run
-         uses: cypress-io/github-action@v5
-          with: 
-            command : npm run test : dropdown
+name: Parallel Cypress Tests
 
-   // upload Report  Folder to CI CD interface
-    // incase of  paraller execurtion sigle upload will not  sufficient because it will be running it will be uploading  the report for the last step 
-    // let say we have two jobs  so we need to pass two saperate artifacts  for these in this case two report would be generated 
-        -name: Cypress test Report  
-         if: always() // condition ensures that these steps runs even if the previous step is failing 
-        -uses: actions/upload-artifact@v3
-          with:  # report getting generated in  your cicd pipeline as folder
-           name: mochawesome HTML Report -alerts# name means folder name
-           path: cypress/reports/html # or path/to/artifact  path your folder  
+on: push
 
-// parallel execution using multiple jobs
-          // in this case what we will do we pass two jobs add another ssript test in the package.json in  (script)
+jobs:
+  cypress-run:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    alerts:
-      runs-on: ubuntu-latest
-      strategy:
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          command: npm run test dropdown
+
+      - name: Cypress test Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: mochawesome-html-report-alerts
+          path: cypress/reports/html
+
+  alerts:
+    runs-on: ubuntu-latest
+    strategy:
       matrix:
-        sepc: [spec1.js,spec2.js,spec3.js,spec4.js]   # Alternatively, let Cypress split specs automatically
-       steps:
-        -name: Checkout
-         uses: actions/checkout@v3
-        #Install npm dependencies, cache them coorectly
-        # and run all Cypress tests
-        -name: Cypress run
-         uses: cypress-io/github-action@v5
-          with: 
-            command : npm run test : alerts
+        spec: [spec1.js, spec2.js, spec3.js, spec4.js]
+    needs: cypress-run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-         name: Run Cypress Tests in Parallel
-        run: npx cypress run --record --parallel --key ${{ secrets.CYPRESS_RECORD_KEY }}    
-# or
-         - name: Run Cypress tests and record results
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        run: npx cypress run --record
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
 
-        -name: Cypress test Report  
-         if: always()
-        -uses: actions/upload-artifact@v3
-          with:  # report getting generated in  your cicd pipeline as folder
-           name: mochawesome HTML Report-dropdown # name means folder name
-           path: cypress/reports/html # or path/to/artifact  path your folder  
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress Tests in Parallel
+        run: npx cypress run --spec ${{ matrix.spec }} --record --parallel --key ${{ secrets.CYPRESS_RECORD_KEY }}
+
+      - name: Cypress test Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: mochawesome-html-report-${{ matrix.spec }}
+          path: cypress/reports/html

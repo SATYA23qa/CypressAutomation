@@ -1,27 +1,58 @@
-name: sanity build tests
+name: Parallel Cypress Tests
+
 on: push
-jobs :
+
+jobs:
   cypress-run:
-    runs-on: ubuntu-22.04
-      steps:
-        -name: Checkout
-         uses: actions/checkout@v3
-        #Install npm dependencies, cache them coorectly
-        # and run all Cypress tests
-        -name: Cypress run
-         uses: cypress-io/github-action@v5
-         with:
-          command: npm run test:alerts  
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-       
-      - name: Run Cypress Tests
-        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
-   
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
 
-        -name: Cypress test Report  
-         if: always()
-        -uses: actions/upload-artifact@v3
-          with:  # report getting generated in  your cicd pipeline as folder
-           name: mochawesome HTML Report # name means folder name
-           path: cypress/reports/html # or path/to/artifact  path your folder  
+      - name: Install dependencies
+        run: npm install
 
+      - name: Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          command: npm run test dropdown
+
+      - name: Cypress test Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: mochawesome-html-report-alerts
+          path: cypress/reports/html
+
+  alerts:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        spec: [spec1.js, spec2.js, spec3.js, spec4.js]
+    needs: cypress-run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress Tests in Parallel
+        run: npx cypress run --spec ${{ matrix.spec }} --record --parallel --key ${{ secrets.CYPRESS_RECORD_KEY }}
+
+      - name: Cypress test Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: mochawesome-html-report-${{ matrix.spec }}
+          path: cypress/reports/html
